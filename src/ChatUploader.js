@@ -129,7 +129,14 @@ const readChats = async (file) => {
   return chats
 }
 
-const ChatUploader = ({onUpload, children}) => {
+const ChatUploader = ({
+  onUpload,
+  children = (
+    <React.Fragment>
+      <strong>Choose a file</strong> or drag it here
+    </React.Fragment>
+  ),
+}) => {
   const [error, setError] = useState(null)
 
   const onDrop = useCallback(async (files) => {
@@ -167,12 +174,7 @@ const ChatUploader = ({onUpload, children}) => {
       >
         <input {...getInputProps()} />
         <span>
-          <FontAwesomeIcon icon={faFileUpload} />{' '}
-          {children || (
-            <React.Fragment>
-              <strong>Choose a file</strong> or drag it here
-            </React.Fragment>
-          )}
+          <FontAwesomeIcon icon={faFileUpload} /> {children}
         </span>
       </div>
       {!!error && (

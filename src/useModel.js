@@ -4,21 +4,26 @@ const defaultPage = 'tutorial'
 
 const defaultSettings = {
   flipped: false,
-  closenessDamping: 0.13,
-  scaling: 0.51,
-  logScaling: 30,
-  bandwidthBias: -0.2,
+  closenessDamping: 0.08,
+  scaling: 0.95,
+  logScaling: 1.83,
+  bandwidthBias: -0.28,
   bandwidthVariance: 0.2,
   selectedRange: null,
   contour: false,
 }
 
 const settingsMinMax = {
-  closenessDamping: [0, 0.65],
-  scaling: [0.49, 0.6],
-  logScaling: [1, 90],
-  bandwidthBias: [-1.5, 1.5],
-  bandwidthVariance: [0.001, 0.5],
+  closenessDamping: [0, 0.5],
+  scaling: [0.88, 1.03],
+  logScaling: [0, 2.5],
+  bandwidthBias: [-0.7, 1.5],
+}
+
+const getBandwidthVariance = (bandwidthBias) => {
+  const [lo, hi] = settingsMinMax.bandwidthBias
+  const x = (bandwidthBias - lo) / (hi - lo)
+  return 0.3 / (1 + Math.E ** (5 - 32 * x)) + 0.01
 }
 
 const defaultNonce = {
@@ -73,6 +78,8 @@ const useModel = () => {
   const [selectedChat, setSelectedChat] = useState(null)
   const [settings, setSettings] = useState(defaultSettings)
   const [redrawNonce, setRedrawNonce] = useState(defaultNonce)
+
+  settings.bandwidthVariance = getBandwidthVariance(settings.bandwidthBias)
 
   return {
     page,

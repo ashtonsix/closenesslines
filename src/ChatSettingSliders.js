@@ -52,33 +52,21 @@ const ChatSettingSliders = (props) => {
       `}
     >
       <label>
-        <span>Closeness Damping</span>
-        <span>
-          <Range name="closenessDamping" {...props} />
-        </span>
-      </label>
-      <label>
         <span>Scaling</span>
         <span>
           <Range name="scaling" {...props} />
         </span>
       </label>
       <label>
-        <span>Log Scaling</span>
+        <span>Damping</span>
         <span>
-          <Range name="logScaling" {...props} />
+          <Range name="closenessDamping" {...props} />
         </span>
       </label>
       <label>
-        <span>Bandwidth Bias</span>
+        <span>Bandwidth</span>
         <span>
           <Range name="bandwidthBias" {...props} />
-        </span>
-      </label>
-      <label>
-        <span>Bandwidth Variance</span>
-        <span>
-          <Range name="bandwidthVariance" {...props} />
         </span>
       </label>
     </div>

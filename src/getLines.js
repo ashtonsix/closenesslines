@@ -98,6 +98,21 @@ const logSequence = (baseValue, count) => {
   return sequence
 }
 
+const centerCrop = (lineA, lineB, padding = 0) => {
+  const both = [].concat(lineA, lineB).map((v) => v[1])
+  let min = Math.min(...both)
+  let max = Math.max(...both)
+  if (min > 1 - max) {
+    min = 1 - max
+  } else {
+    max = 1 - min
+  }
+  const p = padding
+  lineA = mapY(lineA, (v) => ((v - min) / (max - min)) * (1 - p * 2) + p)
+  lineB = mapY(lineB, (v) => ((v - min) / (max - min)) * (1 - p * 2) + p)
+  return [lineA, lineB]
+}
+
 const getLines = (chat, settings = {}, optimisation = {}, sampleRange) => {
   const {
     flipped,
@@ -138,7 +153,7 @@ const getLines = (chat, settings = {}, optimisation = {}, sampleRange) => {
     .filter((m) => m.sender === senderB)
     .map((m) => +m.datetime)
 
-  let lineA, lineB, maxDensity
+  let lineA, lineB
   lineA = mixLines(
     bandwidths.map((b) => {
       return KDE(
@@ -161,16 +176,38 @@ const getLines = (chat, settings = {}, optimisation = {}, sampleRange) => {
     }),
     bandwidthMixture
   )
-  maxDensity = Math.max(...[].concat(lineA, lineB).map((d) => d[1]))
-  lineA = mapY(lineA, (y) => (y / maxDensity) ** (1 / logScaling))
-  lineB = mapY(lineB, (y) => (y / maxDensity) ** (1 / logScaling))
-  maxDensity = Math.max(...[].concat(lineA, lineB).map((d) => d[1]))
-  lineA = mapY(lineA, (y) => (y * scaling) / maxDensity)
-  lineB = mapY(lineB, (y) => 1 - (y * scaling) / maxDensity)
-  const closeness = lineA.map((_, i) => lineA[i][1] - lineB[i][1])
 
+  let maxDensity, avgDensity
+  maxDensity = Math.max(...[].concat(lineA, lineB).map((d) => d[1]))
+  lineA = mapY(lineA, (y) => (y / maxDensity) * 0.85 + 0.15)
+  lineB = mapY(lineB, (y) => (y / maxDensity) * 0.85 + 0.15)
+  lineA = mapY(lineA, (y) => y ** (1 / Math.E ** logScaling))
+  lineB = mapY(lineB, (y) => y ** (1 / Math.E ** logScaling))
+  ;[lineA, lineB] = centerCrop(lineA, lineB)
+
+  // scaling affects area rather than the max, which orthogonalises it from logScaling
+  const ns = optimisation.numSamples * 2
+  avgDensity = [].concat(lineA, lineB).reduce((pv, v) => pv + v[1], 0) / ns
+  maxDensity = Math.max(...[].concat(lineA, lineB).map((d) => d[1]))
+  lineA = mapY(lineA, (y) => (y / avgDensity) * (scaling / 2))
+  lineB = mapY(lineB, (y) => (y / avgDensity) * (scaling / 2))
+
+  // scaling only affects the max when the lines are especially "spiky" and would exceed 1 at points
+  const densityCeiling = -(Math.E ** -scaling) / 2 + 1
+  maxDensity = Math.max(...[].concat(lineA, lineB).map((d) => d[1]))
+  if (maxDensity > densityCeiling) {
+    lineA = mapY(lineA, (y) => (y / maxDensity) * densityCeiling)
+    lineB = mapY(lineB, (y) => (y / maxDensity) * densityCeiling)
+  }
+
+  // flip lineB
+  lineB = mapY(lineB, (y) => 1 - y)
+
+  // add gap
+  ;[lineA, lineB] = centerCrop(lineA, lineB)
+  const closeness = lineA.map((_, i) => lineA[i][1] - lineB[i][1])
   lineA = mapY(lineA, (y, i) => {
-    const cd = closenessDamping / logScaling
+    const cd = closenessDamping
     const c = closeness[i] + cd
     if (c < 0) return y
     const r = (1 - Math.E ** -(c / cd)) * cd
@@ -178,7 +215,7 @@ const getLines = (chat, settings = {}, optimisation = {}, sampleRange) => {
     return y - d
   })
   lineB = mapY(lineB, (y, i) => {
-    const cd = closenessDamping / logScaling
+    const cd = closenessDamping
     const c = closeness[i] + cd
     if (c < 0) return y
     const r = (1 - Math.E ** -(c / cd)) * cd
@@ -186,17 +223,8 @@ const getLines = (chat, settings = {}, optimisation = {}, sampleRange) => {
     return y + d
   })
 
-  const both = [].concat(lineA, lineB).map((v) => v[1])
-  const minValue = Math.min(...both)
-  const maxValue = Math.max(...both)
-  lineA = mapY(
-    lineA,
-    (v) => ((v - minValue) / (maxValue - minValue)) * 0.98 + 0.01
-  )
-  lineB = mapY(
-    lineB,
-    (v) => ((v - minValue) / (maxValue - minValue)) * 0.98 + 0.01
-  )
+  // 0.01-0.99 looks best in Plotly
+  ;[lineA, lineB] = centerCrop(lineA, lineB, 0.01)
 
   return [
     {data: lineA, title: senderA},

@@ -99,10 +99,10 @@ const Tutorial = ({onUploadChats, navigate}) => {
         `}
       >
         Data by itself cannot teach us anything. Because truth is subjective.
-        Pulling <em>Bandwidth Variance</em> to the right tells one story; And
-        pulling it to the left tells another story. The interplay between
-        statistics and perception and storytelling is fascinating, and imposing
-        some default settings upon your story would be an injustice to memory.
+        Pulling <em>Bandwidth</em> to the right tells one story; And pulling it
+        to the left tells another story. The interplay between statistics and
+        perception and storytelling is fascinating, and imposing some default
+        settings upon your story would be an injustice to memory.
       </p>
       <p
         css={css`
@@ -111,8 +111,8 @@ const Tutorial = ({onUploadChats, navigate}) => {
       >
         As you pull the controls this way and that you should try finding the
         closest representation that captures the relationship as you remember
-        it. I can’t articulate what each control does. But if you experiment and{' '}
-        <em>play</em> they’ll soon make sense.
+        it. If you experiment and play with each control they’ll soon make
+        sense.
       </p>
       <h2>What about my privacy?</h2>
       <p
@@ -170,7 +170,7 @@ const Tutorial = ({onUploadChats, navigate}) => {
       </p>
       <h2>Who else contributed?</h2>
       <p>
-        My tutor,{' '}
+        My friend,{' '}
         <a href="https://www.linkedin.com/in/periwynkle/" target="_blank">
           Dr Yin Yin Lu
         </a>
