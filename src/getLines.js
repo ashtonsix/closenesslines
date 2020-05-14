@@ -29,11 +29,9 @@ const histogram = (input, nBuckets, [first, last]) => {
   for (let i = 0; i < nBuckets; i++) {
     time += interval
     let value = 0
-    if (j < input.length) {
-      while (input[j] < time) {
-        if (input[j] >= first) value++
-        j++
-      }
+    while (j < input.length && input[j].t < time) {
+      if (input[j].t >= first) value += input[j].v
+      j++
     }
     if (value) {
       timestamps.push(time - interval / 2)
@@ -148,10 +146,10 @@ const getLines = (chat, settings = {}, optimisation = {}, sampleRange) => {
 
   const timestampsA = messages
     .filter((m) => m.sender === senderA)
-    .map((m) => +m.datetime)
+    .map((m) => ({t: +m.datetime, v: m.message.length}))
   const timestampsB = messages
     .filter((m) => m.sender === senderB)
-    .map((m) => +m.datetime)
+    .map((m) => ({t: +m.datetime, v: m.message.length}))
 
   let lineA, lineB
   lineA = mixLines(

@@ -101,6 +101,7 @@ const parsers = {
 }
 
 const processChat = (messages, provider) => {
+  messages = messages.filter((m) => m.datetime && m.sender && m.message)
   // delete messages not sent by the two most prolific participants in a chat
   const senders = {}
   messages.forEach((m) => {
