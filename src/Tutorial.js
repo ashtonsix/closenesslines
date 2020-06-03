@@ -170,7 +170,7 @@ const Tutorial = ({onUploadChats, navigate}) => {
       </p>
       <h2>Who else contributed?</h2>
       <p>
-        My friend,{' '}
+        My former colleague,{' '}
         <a href="https://www.linkedin.com/in/periwynkle/" target="_blank">
           Dr Yin Yin Lu
         </a>
