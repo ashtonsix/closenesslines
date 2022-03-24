@@ -24,7 +24,7 @@ const getFileProvider = async (file) => {
 }
 
 const parseFacebookChats = async (zip) => {
-  const regex = /messages\/[a-z_]+\/[a-z0-9_]+\/[a-z0-9_]+\.json/g
+  const regex = /messages\/[a-z_]+\/[a-z0-9_-]+\/[a-z0-9_-]+\.json/g
   const files = Object.keys(zip.files).filter((f) => regex.test(f))
   const texts = await Promise.all(files.map((f) => zip.file(f).async('string')))
   const json = texts.map((t) => JSON.parse(t))
